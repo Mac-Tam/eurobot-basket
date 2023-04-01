@@ -39,16 +39,15 @@ void setup()
   while (WiFi.status() != WL_CONNECTED)
   {
     lcd.clear();
-    lcd.print("connecting to wifi ...");
+    lcd.print("wifi ...");
     delay(1000);
   }
 
   lcd.clear();
-  lcd.print("connected to wifi!");
+  lcd.print("wifi ok!");
   delay(1000);
 
   lcd.clear();
-  lcd.print("Connecting to server.");
   delay(1000);
 
   webSocket.begin(serverIP, 9090);
@@ -59,12 +58,16 @@ void setup()
   {
     webSocket.loop();
     lcd.clear();
-    lcd.print("Connecting to server..");
+    lcd.print("server ...");
     delay(100);
   }
-
+  
+  lcd.clear();
+  lcd.print("server ok!");
+  delay(1000);
+  lcd.clear();
   ////////Setup communication with rosbridge package
-  webSocket.sendTXT("{\"op\": \"advertise\", \"topic\": \"/num_balls\", \"type\": \"std_msgs/Int32\"}");
+  webSocket.sendTXT("{\"op\": \"advertise\", \"topic\": \"/basket/num_balls\", \"type\": \"std_msgs/Int32\"}");
   webSocket.sendTXT("{\"op\": \"advertise\", \"topic\": \"/turtle1/cmd_vel\", \"type\": \"geometry_msgs/msg/Twist\"}");
   webSocket.sendTXT("{\"op\":\"subscribe\",\"topic\":\"/basket/score\",\"type\":\"std_msgs/msg/Int32\"}");
 
