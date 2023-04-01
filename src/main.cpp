@@ -61,7 +61,7 @@ void setup()
     lcd.print("server ...");
     delay(100);
   }
-  
+
   lcd.clear();
   lcd.print("server ok!");
   delay(1000);
@@ -117,7 +117,7 @@ void publish_num_balls(WebSocketsClient &webSocket)
 {
   JSONVar doc;
   doc["op"] = "publish";
-  doc["topic"] = "/num_balls";
+  doc["topic"] = "/basket/num_balls";
   JSONVar msg;
   msg["data"] = num_balls;
   doc["msg"] = msg;
