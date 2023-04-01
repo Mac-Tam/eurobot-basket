@@ -9,7 +9,7 @@ String toDigits(int num);
 void publish_num_balls(WebSocketsClient &webSocket);
 void publish_turtle_vel(WebSocketsClient &webSocket);
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
-
+///////////////////////////////////
 // Global vars
 volatile int num_balls = 0;
 volatile int score = 0;
