@@ -4,20 +4,34 @@
 #include <LiquidCrystal.h>
 #include <Ticker.h>
 
+// Global vars
+volatile int num_balls = 0;
+volatile int score = 0;
+
+//Debouncing sensor reading
+unsigned long detection_time = 0;  
+unsigned long last_detection_time = 0;
+void IRAM_ATTR incrementBallCount()
+{
+  detection_time = millis();
+  if (detection_time - last_detection_time > 200)
+  {
+    num_balls++;
+    last_detection_time = detection_time;
+  }
+}
+
 // Function headers
 String toDigits(int num);
 void publish_num_balls(WebSocketsClient &webSocket);
 void publish_turtle_vel(WebSocketsClient &webSocket);
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
 
-// Global vars
-volatile int num_balls = 0;
-volatile int score = 0;
 
 // Network settings
-const char *ssid = "MT";
-const char *pass = "EL604QN8GR8";
-const char *serverIP = "192.168.8.100";
+const char *ssid = "ssid";
+const char *pass = "pass";
+const char *serverIP = "192.168.0.0";
 
 // Display
 const int rs = 32, en = 33, d4 = 26, d5 = 27, d6 = 14, d7 = 12;
@@ -32,9 +46,15 @@ WebSocketsClient webSocket;
 
 void setup()
 {
-  Serial.begin(9600);
-  lcd.begin(16, 2);
+  // lcd.begin(16, 2);
 
+  pinMode(25, INPUT_PULLUP);
+  attachInterrupt(25, incrementBallCount, FALLING);
+  //attach the two other sensor pins here
+  //pinMode(SECOND_SENSOR, INPUT_PULLUP);
+  //attachInterrupt(SECOND_SENSOR, incrementBallCount, FALLING);
+  //pinMode(THIRD_SENSOR, INPUT_PULLUP);
+  //attachInterrupt(THIRD_SENSOR, incrementBallCount, FALLING);
   WiFi.begin(ssid, pass);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -78,10 +98,9 @@ void setup()
 
 void loop()
 {
-  //collect received messages
+  // collect received messages
   webSocket.loop();
-
-  num_balls = random(0, 50);
+  // display
   lcd.setCursor(0, 0);
   lcd.print("Balls: ");
   lcd.print(toDigits(num_balls));
@@ -90,7 +109,7 @@ void loop()
   lcd.print(toDigits(score));
   // publish_turtle_vel(webSocket);
   publish_num_balls(webSocket);
-  delay(500);
+  delay(50);
 }
 
 // a function that takes an int and returns a three digit string
@@ -125,7 +144,7 @@ void publish_num_balls(WebSocketsClient &webSocket)
   webSocket.sendTXT(json_str);
 }
 
-//control turtlesim from esp
+// control turtlesim from esp
 void publish_turtle_vel(WebSocketsClient &webSocket)
 {
   JSONVar doc;
@@ -153,27 +172,21 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
   JSONVar doc;
   switch (type)
   {
-  case WStype_DISCONNECTED:
-    Serial.println("disconnected from ros-bridge");
-    break;
-  case WStype_CONNECTED:
-    Serial.println("connected to ros-bridge");
-    break;
   case WStype_TEXT:
-    Serial.println("received text");
-    Serial.println((char *)payload);
     doc = JSON.parse((char *)payload);
-    //Serial.println("received score");
     score = doc["msg"]["data"];
-    //Serial.println(score);
     break;
 
+  case WStype_CONNECTED:
+  case WStype_DISCONNECTED:
   case WStype_BIN:
   case WStype_ERROR:
   case WStype_FRAGMENT_TEXT_START:
   case WStype_FRAGMENT_BIN_START:
   case WStype_FRAGMENT:
   case WStype_FRAGMENT_FIN:
+    break;
+  default:
     break;
   }
 }
