@@ -87,8 +87,8 @@ void setup()
   delay(1000);
   lcd.clear();
   ////////Setup communication with rosbridge package
+  //webSocket.sendTXT("{\"op\": \"advertise\", \"topic\": \"/turtle1/cmd_vel\", \"type\": \"geometry_msgs/msg/Twist\"}");
   webSocket.sendTXT("{\"op\": \"advertise\", \"topic\": \"/basket/num_balls\", \"type\": \"std_msgs/Int32\"}");
-  webSocket.sendTXT("{\"op\": \"advertise\", \"topic\": \"/turtle1/cmd_vel\", \"type\": \"geometry_msgs/msg/Twist\"}");
   webSocket.sendTXT("{\"op\":\"subscribe\",\"topic\":\"/basket/score\",\"type\":\"std_msgs/msg/Int32\"}");
 
   lcd.print("finished setup");
